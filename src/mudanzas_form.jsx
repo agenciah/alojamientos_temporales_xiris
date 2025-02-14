@@ -115,7 +115,7 @@ function MudanzasForm() {
 
         <FormControl fullWidth margin="normal">
           <TextField
-            label="Notas"
+            label="Notas (opcional)"
             variant="outlined"
             name="notas"
             value={formData.notas}
@@ -146,25 +146,25 @@ function MudanzasForm() {
         }}
       >
         <img src={background} alt="Formato" style={{ width: "100%", height: "100%" }} />
-        <div style={{ position: "absolute", top: "290px", left: "100px", color: "black", fontSize: "18px", fontFamily: "Arial, sans-serif" }}>
+        <div style={{ position: "absolute", top: "290px", left: "100px", color: "black", fontSize: "20px", fontFamily: "Arial, sans-serif" }}>
           {formData.nombreCompleto}
         </div>
-        <div style={{ position: "absolute", top: "385px", left: "100px", color: "black", fontSize: "18px" }}>
+        <div style={{ position: "absolute", top: "385px", left: "100px", color: "black", fontSize: "22px" }}>
           {formData.numeroPersonas}
         </div>
-        <div style={{ position: "absolute", top: "475px", left: "100px", color: "black", fontSize: "18px" }}>
+        <div style={{ position: "absolute", top: "475px", left: "100px", color: "black", fontSize: "22px" }}>
           {formData.marcaVehiculo}
         </div>
-        <div style={{ position: "absolute", top: "570px", left: "100px", color: "black", fontSize: "18px", whiteSpace: "pre-wrap" }}>
+        <div style={{ position: "absolute", top: "570px", left: "100px", color: "black", fontSize: "22px", whiteSpace: "pre-wrap" }}>
           {formData.tarjetaCirculacion}
         </div>
-        <div style={{ position: "absolute", top: "660px", left: "100px", color: "black", fontSize: "18px" }}>
+        <div style={{ position: "absolute", top: "660px", left: "100px", color: "black", fontSize: "22px" }}>
           {formData.empresaMudanza}
         </div>
-        <div style={{ position: "absolute", top: "775px", left: "275px", color: "black", fontSize: "18px", whiteSpace: "pre-wrap" }}>
+        <div style={{ position: "absolute", top: "775px", left: "275px", color: "black", fontSize: "22px", whiteSpace: "pre-wrap" }}>
           {formData.datosChofer}
         </div>
-        <div style={{ position: "absolute", top: "750px", left: "20px", color: "black", fontSize: "18px", whiteSpace: "pre-wrap" }}>
+        <div style={{ position: "absolute", top: "750px", left: "20px", color: "black", fontSize: "22px", whiteSpace: "pre-wrap" }}>
           {formData.notas}
         </div>
       </div>
