@@ -1,7 +1,8 @@
-import { useState, useRef } from "react";
-import html2canvas from "html2canvas";
+import { useState, useEffect } from "react";
 import { TextField, Button, Container, FormControl } from "@mui/material";
+import { jsPDF } from "jspdf";
 import background from "/home/alex1986/aviso_mudanza_xiris/src/assets/airbnb_xiris.jpg";
+import CropImage from "./componentes/crop/cropimage";
 
 function MudanzasForm() {
   const [formData, setFormData] = useState({
@@ -14,41 +15,64 @@ function MudanzasForm() {
     notas: "",
   });
 
-  const captureRef = useRef(null);
+  const [imageSrc, setImageSrc] = useState(null);
+  const [croppedImages, setCroppedImages] = useState([]);
+  const [backgroundImage, setBackgroundImage] = useState(null);
+
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 595;
+      canvas.height = 842;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, 595, 842);
+      setBackgroundImage(canvas.toDataURL("image/jpeg"));
+    };
+    img.src = background;
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleGenerateImage = () => {
-    const input = captureRef.current;
-  
-    if (!input) return;
-  
-    input.style.display = "block"; // Mostrar temporalmente el div
-    html2canvas(input, { useCORS: true }).then((canvas) => {
-      input.style.display = "none"; // Ocultar nuevamente
-  
-      const imgData = canvas.toDataURL("image/jpeg");
-      const link = document.createElement("a");
-      link.href = imgData;
-      link.download = `Autorizacion_Condominio_Xiris_para_${formData.nombreCompleto}.jpg`;
-      link.click();
-  
-      // Limpiar los campos después de la generación de la imagen
-      setFormData({
-        nombreCompleto: "",
-        numeroPersonas: "",
-        marcaVehiculo: "",
-        tarjetaCirculacion: "",
-        empresaMudanza: "",
-        datosChofer: "",
-        notas: "",
-      });
-    });
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => setImageSrc(reader.result);
+      reader.readAsDataURL(file);
+    }
   };
-  
+
+  const handleCropComplete = (croppedImage) => {
+    setCroppedImages((prevImages) => [...prevImages, croppedImage]);
+    setImageSrc(null);
+  };
+
+  const generatePDF = () => {
+    const pdf = new jsPDF({ orientation: "portrait", unit: "px", format: "a4" });
+
+    if (backgroundImage) {
+      pdf.addImage(backgroundImage, "JPEG", 0, 0, 446, 631);
+    }
+
+    pdf.text(formData.nombreCompleto, 100, 290);
+    pdf.text(formData.numeroPersonas, 100, 385);
+    pdf.text(formData.marcaVehiculo, 100, 475);
+    pdf.text(formData.tarjetaCirculacion, 100, 570);
+    pdf.text(formData.empresaMudanza, 100, 660);
+    pdf.text(formData.datosChofer, 275, 775);
+    pdf.text(formData.notas, 20, 750);
+
+    croppedImages.forEach((img) => {
+      pdf.addPage();
+      pdf.addImage(img, "PNG", 50, 100, 295, 202);
+    });
+
+    pdf.save(`Autorizacion_${formData.nombreCompleto}.pdf`);
+  };
 
   return (
     <Container>
@@ -56,118 +80,39 @@ function MudanzasForm() {
         <FormControl fullWidth margin="normal">
           <TextField
             label="Nombre Completo"
-            variant="outlined"
             name="nombreCompleto"
             value={formData.nombreCompleto}
             onChange={handleChange}
           />
         </FormControl>
-
         <FormControl fullWidth margin="normal">
           <TextField
-            label="Número de Personas que Visitan"
-            variant="outlined"
+            label="Número de Personas"
             name="numeroPersonas"
             value={formData.numeroPersonas}
             onChange={handleChange}
           />
         </FormControl>
-
         <FormControl fullWidth margin="normal">
           <TextField
             label="Marca de Vehículo y placas"
-            variant="outlined"
             name="marcaVehiculo"
             value={formData.marcaVehiculo}
             onChange={handleChange}
           />
         </FormControl>
-
-        <FormControl fullWidth margin="normal">
-          <TextField
-            label="Tarjeta de Circulación"
-            variant="outlined"
-            name="tarjetaCirculacion"
-            value={formData.tarjetaCirculacion}
-            onChange={handleChange}
+        <input type="file" accept="image/*" onChange={handleImageUpload} />
+        {imageSrc && (
+          <CropImage
+            imageSrc={imageSrc}
+            onCropCompleteCallback={handleCropComplete}
+            onClose={() => setImageSrc(null)}
           />
-        </FormControl>
-
-        <FormControl fullWidth margin="normal">
-          <TextField
-            label="Número de vivienda"
-            variant="outlined"
-            name="empresaMudanza"
-            value={formData.empresaMudanza}
-            onChange={handleChange}
-          />
-        </FormControl>
-
-        {/* <FormControl fullWidth margin="normal">
-          <TextField
-            label="Datos del Chofer y Trabajadores"
-            variant="outlined"
-            name="datosChofer"
-            value={formData.datosChofer}
-            onChange={handleChange}
-          />
-        </FormControl> */}
-
-        <FormControl fullWidth margin="normal">
-          <TextField
-            label="Notas (opcional)"
-            variant="outlined"
-            name="notas"
-            value={formData.notas}
-            onChange={handleChange}
-            multiline
-            rows={4}
-            inputProps={{ maxLength: 445 }} // Límite de caracteres
-          />
-        </FormControl>
-
-        <Button
-          variant="contained"
-          style={{ backgroundColor: "#26A9E1", color: "#FFFFFF", marginTop: "20px" }}
-          onClick={handleGenerateImage}
-        >
-          Generar Imagen
+        )}
+        <Button variant="contained" style={{ marginTop: "20px" }} onClick={generatePDF}>
+          Generar PDF
         </Button>
       </form>
-
-      {/* Div Oculto que Captura html2canvas */}
-      <div
-        ref={captureRef}
-        style={{
-          display: "none",
-          position: "relative",
-          width: "800px",
-          height: "1000px",
-        }}
-      >
-        <img src={background} alt="Formato" style={{ width: "100%", height: "100%" }} />
-        <div style={{ position: "absolute", top: "290px", left: "100px", color: "black", fontSize: "20px", fontFamily: "Arial, sans-serif" }}>
-          {formData.nombreCompleto}
-        </div>
-        <div style={{ position: "absolute", top: "385px", left: "100px", color: "black", fontSize: "22px" }}>
-          {formData.numeroPersonas}
-        </div>
-        <div style={{ position: "absolute", top: "475px", left: "100px", color: "black", fontSize: "22px" }}>
-          {formData.marcaVehiculo}
-        </div>
-        <div style={{ position: "absolute", top: "570px", left: "100px", color: "black", fontSize: "22px", whiteSpace: "pre-wrap" }}>
-          {formData.tarjetaCirculacion}
-        </div>
-        <div style={{ position: "absolute", top: "660px", left: "100px", color: "black", fontSize: "22px" }}>
-          {formData.empresaMudanza}
-        </div>
-        <div style={{ position: "absolute", top: "775px", left: "275px", color: "black", fontSize: "22px", whiteSpace: "pre-wrap" }}>
-          {formData.datosChofer}
-        </div>
-        <div style={{ position: "absolute", top: "750px", left: "20px", color: "black", fontSize: "22px", whiteSpace: "pre-wrap" }}>
-          {formData.notas}
-        </div>
-      </div>
     </Container>
   );
 }
