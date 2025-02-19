@@ -1,23 +1,30 @@
 import { useState, useEffect } from "react";
-import { TextField, Button, Container, FormControl } from "@mui/material";
+import { TextField, Button, Container, FormControl, Snackbar, Alert } from "@mui/material";
 import { jsPDF } from "jspdf";
 import background from "/home/alex1986/aviso_mudanza_xiris/src/assets/airbnb_xiris.jpg";
 import CropImage from "./componentes/crop/cropimage";
+import page2Background from "./assets/airbnb_xiris_pagina_2.jpg"
 
 function MudanzasForm() {
   const [formData, setFormData] = useState({
+    nombrePropietario: "",
+    nombrehuesped: "",
     nombreCompleto: "",
     numeroPersonas: "",
     marcaVehiculo: "",
     tarjetaCirculacion: "",
-    empresaMudanza: "",
-    datosChofer: "",
+    departamento: "",
+    nombreNinos: "",
     notas: "",
   });
 
   const [imageSrc, setImageSrc] = useState(null);
   const [croppedImages, setCroppedImages] = useState([]);
   const [backgroundImage, setBackgroundImage] = useState(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false); // Estado para el Snackbar
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // Mensaje del Snackbar
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // Severidad del Snackbar
+
 
   useEffect(() => {
     const img = new Image();
@@ -49,6 +56,16 @@ function MudanzasForm() {
   const handleCropComplete = (croppedImage) => {
     setCroppedImages((prevImages) => [...prevImages, croppedImage]);
     setImageSrc(null);
+    setSnackbarMessage("Imagen agregada correctamente."); // Mensaje de éxito
+    setSnackbarSeverity("success");
+    setSnackbarOpen(true); // Abre el Snackbar
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbarOpen(false); // Cierra el Snackbar
   };
 
   const generatePDF = () => {
@@ -58,20 +75,37 @@ function MudanzasForm() {
       pdf.addImage(backgroundImage, "JPEG", 0, 0, 446, 631);
     }
 
-    pdf.text(formData.nombreCompleto, 100, 290);
-    pdf.text(formData.numeroPersonas, 100, 385);
-    pdf.text(formData.marcaVehiculo, 100, 475);
-    pdf.text(formData.tarjetaCirculacion, 100, 570);
-    pdf.text(formData.empresaMudanza, 100, 660);
-    pdf.text(formData.datosChofer, 275, 775);
-    pdf.text(formData.notas, 20, 750);
+    pdf.text(formData.nombrePropietario, 100, 190);
+    pdf.text(formData.nombrehuesped, 100, 245);
+    pdf.text(formData.nombreCompleto, 100, 190);
+    pdf.text(formData.numeroPersonas, 100, 295);
+    pdf.text(formData.marcaVehiculo, 100, 450);
+    pdf.text(formData.tarjetaCirculacion, 100, 500);
+    pdf.text(formData.departamento, 100, 400);
+    pdf.text(formData.nombreNinos, 100, 345);
 
     croppedImages.forEach((img) => {
       pdf.addPage();
-      pdf.addImage(img, "PNG", 50, 100, 295, 202);
+      pdf.addImage(page2Background, "JPEG", 0, 0, 446, 631);
+      pdf.addImage(img, "PNG", 50, 150, 295, 202);
     });
 
     pdf.save(`Autorizacion_${formData.nombreCompleto}.pdf`);
+
+    //Limpiar los campos
+    setFormData({
+      nombrePropietario: "",
+      nombrehuesped: "",
+      nombreCompleto: "",
+      numeroPersonas: "",
+      marcaVehiculo: "",
+      tarjetaCirculacion: "",
+      departamento: "",
+      nombreNinos: "",
+      notas: "",
+    });
+
+    setCroppedImages([]); // Limpiar las imágenes cargadas
   };
 
   return (
@@ -79,17 +113,41 @@ function MudanzasForm() {
       <form>
         <FormControl fullWidth margin="normal">
           <TextField
-            label="Nombre Completo"
-            name="nombreCompleto"
-            value={formData.nombreCompleto}
+            label="Nombre del Propietario"
+            name="nombrePropietario"
+            value={formData.nombrePropietario}
             onChange={handleChange}
           />
         </FormControl>
         <FormControl fullWidth margin="normal">
           <TextField
-            label="Número de Personas"
+            label="Nombre del huesped"
+            name="nombrehuesped"
+            value={formData.nombrehuesped}
+            onChange={handleChange}
+          />
+        </FormControl>
+        <FormControl fullWidth margin="normal">
+          <TextField
+            label="Número de Personas que ingresan"
             name="numeroPersonas"
             value={formData.numeroPersonas}
+            onChange={handleChange}
+          />
+        </FormControl>
+        <FormControl fullWidth margin="normal">
+          <TextField
+            label="Departamento"
+            name="departamento"
+            value={formData.departamento}
+            onChange={handleChange}
+          />
+        </FormControl>
+        <FormControl fullWidth margin="normal">
+          <TextField
+            label="Nombre de niños"
+            name="nombreNinos"
+            value={formData.nombreNinos}
             onChange={handleChange}
           />
         </FormControl>
@@ -101,7 +159,15 @@ function MudanzasForm() {
             onChange={handleChange}
           />
         </FormControl>
-        <input type="file" accept="image/*" onChange={handleImageUpload} />
+        <FormControl fullWidth margin="normal">
+          <TextField
+            label="Tarjeta de Circulación (Debe coincidir con placas)"
+            name="tarjetaCirculacion"
+            value={formData.tarjetaCirculacion}
+            onChange={handleChange}
+          />
+          </FormControl>
+        <input type="file" accept="image/*" onChange={handleImageUpload}/>
         {imageSrc && (
           <CropImage
             imageSrc={imageSrc}
@@ -112,6 +178,12 @@ function MudanzasForm() {
         <Button variant="contained" style={{ marginTop: "20px" }} onClick={generatePDF}>
           Generar PDF
         </Button>
+        {/* Snackbar para la confirmación */}
+        <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={handleSnackbarClose}>
+          <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
       </form>
     </Container>
   );

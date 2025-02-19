@@ -42,8 +42,7 @@ function App() {
           Formulario para Airbnb, Condominio Xiris.
         </Typography>
         <Typography sx={{ color: '#262161', mt: 2 }}>
-          Por favor llena los campos, descarga la imagen con el botón al final de la página. 
-          Esta imagen compártela al administrador del condominio.
+          Por favor llena los campos, ingresa las identificaciones de los mayores de edad, junto con una imagen de la tarjeta de circulación, la tarjeta de circulación debe coincidir con las placas. Descarga el pdf con el botón al final de la página y compártela al administrador del condominio.
         </Typography>
       </header>
       <Mudanzas_form />
