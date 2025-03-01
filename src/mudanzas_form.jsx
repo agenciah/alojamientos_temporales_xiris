@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { TextField, Button, Container, FormControl, Snackbar, Alert } from "@mui/material";
 import { jsPDF } from "jspdf";
-import background from "/home/alex1986/aviso_mudanza_xiris/src/assets/airbnb_condominio_xiris.jpg";
+import background from "./assets/alojamientos_temporales_xiris.jpg";
 import CropImage from "./componentes/crop/cropimage";
-import page2Background from "./assets/airbnb_xiris_pagina_2.jpg"
+import page2Background from "./assets/airbnb_xiris_pagina_2.jpg";
+import "./fonts/Raleway-Regular.ttf"
 
 function MudanzasForm() {
   const [formData, setFormData] = useState({
@@ -70,17 +71,20 @@ function MudanzasForm() {
   const generatePDF = () => {
     const pdf = new jsPDF({ orientation: "portrait", unit: "px", format: "a4" });
 
+    pdf.addFont("Raleway-Regular.ttf", "Raleway", "normal", "truetype");
+    pdf.setFont("Raleway");
+
     if (backgroundImage) {
       pdf.addImage(backgroundImage, "JPEG", 0, 0, 446, 631);
     }
 
-    pdf.text(formData.nombrePropietario, 205, 200);
-    pdf.text(formData.nombrehuesped, 205, 260);
-    pdf.text(formData.numeroPersonas, 205, 330);
-    pdf.text(formData.marcaVehiculo, 205, 510);
-    pdf.text(formData.tarjetaCirculacion, 205, 570);
-    pdf.text(formData.departamento, 205, 450);
-    pdf.text(formData.nombreNinos, 205, 380);
+    pdf.text(formData.nombrePropietario, 80, 170);
+    pdf.text(formData.nombrehuesped, 80, 230);
+    pdf.text(formData.numeroPersonas, 80, 290);
+    pdf.text(formData.marcaVehiculo, 80, 480);
+    pdf.text(formData.tarjetaCirculacion, 80, 540);
+    pdf.text(formData.departamento, 80, 410);
+    pdf.text(formData.nombreNinos, 80, 350);
 
     croppedImages.forEach((img) => {
       pdf.addPage();
@@ -143,7 +147,7 @@ function MudanzasForm() {
         </FormControl>
         <FormControl fullWidth margin="normal">
           <TextField
-            label="Nombre de niños"
+            label="Cantidad de niños que ingresan"
             name="nombreNinos"
             value={formData.nombreNinos}
             onChange={handleChange}
